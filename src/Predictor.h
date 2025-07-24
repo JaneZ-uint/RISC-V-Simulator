@@ -1,5 +1,6 @@
+#pragma once
 namespace JaneZ{
-    class Predictor{
+class Predictor{
 
-    };
+};
 }

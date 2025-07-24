@@ -1,5 +1,8 @@
+#pragma once
 namespace JaneZ {
-    class Memory{
-
-    };
+const int MEMSize = 1e6;
+class Memory{
+public:
+    unsigned int mem[MEMSize] = {};
+};
 }

@@ -1,5 +1,6 @@
-namespace RF{
-    class RF{
+#pragma once
+namespace JaneZ{
+class RF{
 
-    };
+};
 }

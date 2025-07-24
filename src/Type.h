@@ -1,0 +1,10 @@
+#pragma once
+#include <regex>
+namespace JaneZ{
+enum Operation {
+    ADD,SUB,AND,OR,XOR,SLL,SRL,SRA,SLT,SLTU,
+    ADDI,ANDI,ORI,XORI,SLLI,SRLI,SRAI,SLTI,SLTIU,
+    LB,LBU,LH,LHU,LW,SB,SH,SW,BEQ,BGE,BGEU,BLT,BLTU,BNE,JAL,JALR,
+    AUIPC,LUI,EXIT
+};
+}

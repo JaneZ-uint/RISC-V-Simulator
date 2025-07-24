@@ -1,5 +1,6 @@
+#pragma once
 namespace JaneZ{
-    class RS{
+class RS{
 
-    };
+};
 }
