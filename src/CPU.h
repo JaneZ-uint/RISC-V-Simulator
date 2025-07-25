@@ -12,9 +12,7 @@
 namespace JaneZ{
 class CPU{
 private:
-    DecodeRes GetDecodeRes(){
-        
-    }
+
 public:
     ALU alu;
     Decoder decoder;
@@ -25,6 +23,7 @@ public:
     RoB rob;
     RS rs;
     uint32_t pc;
+    int clk = 0;
 
     unsigned int run(){
         
