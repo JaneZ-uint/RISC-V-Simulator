@@ -15,6 +15,12 @@ struct RSInfo{
 };
 
 class RS{
-
+public:
+    RSInfo toAdd;
+    RSInfo toLeave;
+    
+    void run(){
+        
+    }
 };
 }

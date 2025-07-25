@@ -8,7 +8,6 @@ public:
     int head = 0;
     int tail = 0;
     int l = 0;
-
     void push(T &current){
         data[tail] = current;
         tail = (tail + 1) % length;
@@ -39,5 +38,11 @@ public:
     bool isFull(){
         return l == length;
     }
+
+    /*void tick() {
+        for () {
+            element.tick();
+        }
+    }*/
 };
 }

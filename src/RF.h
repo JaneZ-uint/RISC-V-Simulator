@@ -2,7 +2,7 @@
 namespace JaneZ{
 class RF{
 public:
-    int Register[32] = {};
+    int dependency[32] = {};
 };
 
 }
