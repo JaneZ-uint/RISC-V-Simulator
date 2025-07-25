@@ -35,5 +35,9 @@ public:
     int Size(){
         return l;
     }
+
+    bool isFull(){
+        return l == length;
+    }
 };
 }

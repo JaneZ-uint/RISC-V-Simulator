@@ -12,8 +12,15 @@
 namespace JaneZ{
 class CPU{
 private:
+    //fetch
+    void fetch(){
 
+    }
+
+    
 public:
+    CPU() = default;
+
     ALU alu;
     Decoder decoder;
     LSB lsb;
@@ -25,8 +32,10 @@ public:
     uint32_t pc;
     int clk = 0;
 
+    //总接口
     unsigned int run(){
-        
+        ++ clk;
+
     }
 
     
