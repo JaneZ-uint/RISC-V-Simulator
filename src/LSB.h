@@ -18,7 +18,7 @@ struct LSBInfo{
 };
 
 struct LSBOutput{
-    LSBInfo res;
+     res;
     bool isRead;
 };
     
@@ -28,41 +28,42 @@ public:
     LSBInfo lsb[1000];
     Reg<int> head = {0,0};
     Reg<int> tail = {0,0};
-    Reg<int> length = {0,0};
     int cnt = 0;
+    bool isAdd;
+    LSBInfo input;
+    LSBInfo output;
 
-    LSBOutput run(bool isAdd,LSBInfo toAdd) {
+    void run() {
         if(isAdd){
-            lsb[tail.current] = toAdd;
-            tail.current ++;
-            tail.update(tail.current);
+            lsb[tail.current] = input;
+            tail.update(tail.current + 1);
         }
         LSBInfo b = lsb[head.current];
-        LSBOutput res;
-        res.isRead = false;
         if(cnt == 0){
             if(!b.isBusy.current){
-                LSBInfo output;
+                cnt = (cnt + 1) % 3;
+                head.update(head.current + 1);
+                LSBInfo res;
                 if(b.op == LB){
                     //TODO
-                    res.res = output;
-                    res.isRead = true;
+                    output = res;
+                   
                 }else if(b.op == LBU){
                     //TODO
-                    res.res = output;
-                    res.isRead = true;
+                    output = res;
+                    
                 }else if(b.op == LH){
                     //TODO
-                    res.res = output;
-                    res.isRead = true;
+                    output = res;
+                    
                 }else if(b.op == LHU){
                     //TODO
-                    res.res = output;
-                    res.isRead = true;
+                    output = res;
+                    
                 }else if(b.op == LW){
                     //TODO
-                    res.res = output;
-                    res.isRead = true;
+                    output = res;
+                    
                 }else if(b.op == SB){
 
                 }else if(b.op == SH){
@@ -72,14 +73,21 @@ public:
                 }
                 b.isBusy.current = true;
                 b.isBusy.update(b.isBusy.current);
+            }else{
+                cnt = 0;
             }
+        }else{
+            cnt = (cnt + 1) % 3;
         }
-        cnt ++;
-        return res;
+        if(cnt == 3){
+            //TODO
+        }else{
+            //TODO
+        }
     }
 
     void tick() {
-        for(int i = 0;i < 100;i ++){
+        for(int i = 0;i < 1000;i ++){
             lsb[i].tick();
         }
     }

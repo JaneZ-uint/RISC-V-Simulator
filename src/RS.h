@@ -1,26 +1,206 @@
 #pragma once
 #include "Type.h"
+#include "reg.h"
+#include "ALUs.h"
+#include "LSB.h"
+#include <cstdio>
 
 namespace JaneZ{
+enum opType{
+    ALU,MEM
+};
+
 struct RSInfo{
     int serial;
-    bool isBusy;
-    Operation op;    
-    int Vj;
-    int Vk;
-    int Qj;
-    int Qk;
+    Reg<int> signal;
+    Operation op;
+    opType type;
+    Reg<int> Vj;
+    Reg<int> Vk;
+    Reg<int> Qj;
+    Reg<int> Qk;
     int des;
     int imm = 0;
+    Reg<int> res;
+
+    void tick(){
+        signal.flush();
+        Vj.flush();
+        Vk.flush();
+        Qj.flush();
+        Qk.flush();
+    }
+};
+
+struct RSOutput{
+    int des;
+    int res;
+    bool flag;
 };
 
 class RS{
 public:
-    RSInfo toAdd;
-    RSInfo toLeave;
-    
-    void run(){
-        
+    RSInfo rsALU[1000];
+    RSInfo rsLSB[1000];
+    Reg<int> head = {0,0};
+    Reg<int> tail = {0,0};
+    RSInfo input;
+    RSOutput output;
+    bool isAdd;
+    class ALU alu;
+    class LSB lsb;
+
+    void Enqueue(){
+        if(isAdd){
+            switch (input.op) {
+            case ADD:
+            case SUB:
+            case AND:
+            case OR:
+            case XOR:
+            case SLL:
+            case SRL:
+            case SRA:
+            case SLT:
+            case SLTU:
+            case ADDI:
+            case ANDI:
+            case ORI:
+            case XORI:
+            case SLLI:
+            case SRLI:
+            case SRAI:
+            case SLTI:
+            case SLTIU:
+            case BEQ:
+            case BGE:
+            case BGEU:
+            case BLT:
+            case BLTU:
+            case BNE: {
+                for(int i = 0;i < 1000;i ++){
+                    if(rsALU[i].signal.current == 0){
+                        rsALU[i] = input;
+                        rsALU[i].signal.update(true);
+                        break;
+                    }
+                }
+                break;
+            }
+            case LB:
+            case LBU:
+            case LH:
+            case LHU:
+            case LW:
+            case SB:
+            case SH:
+            case SW: {
+                rsLSB[tail.current] = input;
+                tail.update(tail.current + 1);
+                break;
+            }
+            case JAL:
+            case JALR:
+            case AUIPC:
+            case LUI:
+            case EXIT:
+                printf("Never reach here!");
+                break;
+            }
+        }
+    }
+
+    void Check(){
+        for(int i = 0;i < 1000;i ++){
+            if(rsALU[i].Qj.current == 0 && rsALU[i].Qk.current == 0){
+                if(rsALU[i].signal.current == 1){
+                    rsALU[i].res.update(alu.execute(ALUInput{rsALU[i].op,(unsigned) rsALU[i].Vj.current,
+                        (unsigned) rsALU[i].Vk.current}));
+                    rsALU[i].signal.update(0);
+                    //broadcast
+                    output.des = rsALU[i].des;
+                    output.res = rsALU[i].res.next;
+                    output.flag = true;
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsALU[j].signal.current == 1){
+                            if(rsALU[j].Qj.current == rsALU[i].serial){
+                                rsALU[j].Qj.update(0);
+                                rsALU[j].Vj.update(output.res);
+                            }
+                            if(rsALU[j].Qk.current == rsALU[i].serial){
+                                rsALU[j].Qk.update(0);
+                                rsALU[j].Vk.update(output.res)l
+                            }
+                        }
+                    }
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsLSB[j].signal.current == 1){
+                            if(rsLSB[j].Qj.current == rsALU[i].serial){
+                                rsLSB[j].Qj.update(0);
+                                rsLSB[j].Vj.update(output.res);
+                            }
+                            if(rsLSB[j].Qk.current == rsALU[i].serial){
+                                rsLSB[j].Qk.update(0);
+                                rsLSB[j].Vk.update(output.res);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        for(int i = 0;i < 1000;i ++){
+            if(rsLSB[i].Qj.current == 0 && rsLSB[i].Qk.current == 0){
+                if(rsLSB[i].signal.current == 1){
+                    lsb rsLSB[i].;
+                    rsLSB[i].signal.update(2);
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsLSB[j].signal.current == 1){
+                            if(rsLSB[j].Qj.current == rsLSB[i].serial){
+                                rsLSB[j].Qj.update(0);
+                                rsLSB[j].Vj.update();//TODO );
+                            }
+                            if(rsLSB[j].Qk.current == rsLSB[j].serial){
+                                rsLSB[j].Qk.update(0);
+                                rsLSB[j].Vk.update(int data);//TODO
+                            }
+                        }
+                    }
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsALU[j].signal.current == 1){
+                            if(rsALU[j].Qj.current == rsLSB[i].serial){
+                                rsALU[j].Qj.update(0);
+                                rsALU[j].Vj.update();//TODO );
+                            }
+                            if(rsALU[j].Qk.current == rsLSB[j].serial){
+                                rsALU[j].Qk.update(0);
+                                rsALU[j].Vk.update(int data);//TODO
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    void Deque(){
+        if(a signal from mem){
+            for(int i = 0;i < 1000;i ++){
+                if(signal.serial == rsLSB[i].serial){
+                    head.update(head.current + 1);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    void tick(){
+        for(int i = 0;i < 1000;i ++){
+            rsALU[i].tick();
+            rsLSB[i].tick();
+        }
     }
 };
 }
