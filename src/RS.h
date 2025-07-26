@@ -33,7 +33,7 @@ struct RSInfo{
 };
 
 struct RSOutput{
-    int des;
+    int serial;
     int res;
     bool flag;
 };
@@ -49,6 +49,8 @@ public:
     bool isAdd;
     class ALU alu;
     class LSB lsb;
+    LSBInfo lsbinfo;
+    LSBOutput lsboutput;
 
     void Enqueue(){
         if(isAdd){
@@ -96,7 +98,7 @@ public:
             case SH:
             case SW: {
                 rsLSB[tail.current] = input;
-                tail.update(tail.current + 1);
+                tail.update((tail.current + 1)%1000);
                 break;
             }
             case JAL:
@@ -111,6 +113,7 @@ public:
     }
 
     void Check(){
+        //rsALU中 第一个 可送去ALU的order 
         for(int i = 0;i < 1000;i ++){
             if(rsALU[i].Qj.current == 0 && rsALU[i].Qk.current == 0){
                 if(rsALU[i].signal.current == 1){
@@ -118,9 +121,10 @@ public:
                         (unsigned) rsALU[i].Vk.current}));
                     rsALU[i].signal.update(0);
                     //broadcast
-                    output.des = rsALU[i].des;
+                    //output.des = rsALU[i].des;
                     output.res = rsALU[i].res.next;
                     output.flag = true;
+                    output.serial = rsALU[i].serial;
                     for(int j = 0;j < 1000;j ++){
                         if(rsALU[j].signal.current == 1){
                             if(rsALU[j].Qj.current == rsALU[i].serial){
@@ -129,7 +133,7 @@ public:
                             }
                             if(rsALU[j].Qk.current == rsALU[i].serial){
                                 rsALU[j].Qk.update(0);
-                                rsALU[j].Vk.update(output.res)l
+                                rsALU[j].Vk.update(output.res);
                             }
                         }
                     }
@@ -149,35 +153,17 @@ public:
                 }
             }
         }
+        //rsLSB 
         for(int i = 0;i < 1000;i ++){
             if(rsLSB[i].Qj.current == 0 && rsLSB[i].Qk.current == 0){
                 if(rsLSB[i].signal.current == 1){
-                    lsb rsLSB[i].;
+                    lsbinfo.des = rsLSB[i].des;
+                    lsbinfo.imm = rsLSB[i].imm;
+                    lsbinfo.op = rsLSB[i].op;
+                    lsbinfo.serial = rsLSB[i].serial;
+                    lsbinfo.Vj = rsLSB[i].Vj.current;
+                    lsbinfo.Vk = rsLSB[i].Vk.current;
                     rsLSB[i].signal.update(2);
-                    for(int j = 0;j < 1000;j ++){
-                        if(rsLSB[j].signal.current == 1){
-                            if(rsLSB[j].Qj.current == rsLSB[i].serial){
-                                rsLSB[j].Qj.update(0);
-                                rsLSB[j].Vj.update();//TODO );
-                            }
-                            if(rsLSB[j].Qk.current == rsLSB[j].serial){
-                                rsLSB[j].Qk.update(0);
-                                rsLSB[j].Vk.update(int data);//TODO
-                            }
-                        }
-                    }
-                    for(int j = 0;j < 1000;j ++){
-                        if(rsALU[j].signal.current == 1){
-                            if(rsALU[j].Qj.current == rsLSB[i].serial){
-                                rsALU[j].Qj.update(0);
-                                rsALU[j].Vj.update();//TODO );
-                            }
-                            if(rsALU[j].Qk.current == rsLSB[j].serial){
-                                rsALU[j].Qk.update(0);
-                                rsALU[j].Vk.update(int data);//TODO
-                            }
-                        }
-                    }
                     break;
                 }
             }
@@ -185,16 +171,46 @@ public:
     }
 
     void Deque(){
-        if(a signal from mem){
+        if(lsboutput.flag){
             for(int i = 0;i < 1000;i ++){
-                if(signal.serial == rsLSB[i].serial){
-                    head.update(head.current + 1);
+                if(lsboutput.serial == rsLSB[i].serial){
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsLSB[j].signal.current == 1){
+                            if(rsLSB[j].Qj.current == rsLSB[i].serial){
+                                rsLSB[j].Qj.update(0);
+                                rsLSB[j].Vj.update(lsboutput.value);
+                            }
+                            if(rsLSB[j].Qk.current == rsLSB[j].serial){
+                                rsLSB[j].Qk.update(0);
+                                rsLSB[j].Vk.update(lsboutput.value);
+                            }
+                        }
+                    }
+                    for(int j = 0;j < 1000;j ++){
+                        if(rsALU[j].signal.current == 1){
+                            if(rsALU[j].Qj.current == rsLSB[i].serial){
+                                rsALU[j].Qj.update(0);
+                                rsALU[j].Vj.update(lsboutput.value);
+                            }
+                            if(rsALU[j].Qk.current == rsLSB[j].serial){
+                                rsALU[j].Qk.update(0);
+                                rsALU[j].Vk.update(lsboutput.value);
+                            }
+                        }
+                    }
+                    head.update((head.current + 1)%1000);
                     break;
                 }
             }
         }
     }
 
+    //interface
+    void run(){
+        Enqueue();
+        Check();
+        Deque();
+    }
 
     void tick(){
         for(int i = 0;i < 1000;i ++){
