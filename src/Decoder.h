@@ -1,20 +1,30 @@
 #pragma once
+#include "RF.h"
 #include "Type.h"
+extern JaneZ::RF rf;
 
 namespace JaneZ{
 struct DecodeRes{
     Operation op;
     int rs1 = 0;
+    int q1 = -1;
+    int v1;
     int rs2 = 0;
+    int q2 = -1;
+    int v2;
     int imm = 0;
     int rd = 0;
+    int serial;
 };
 
 class Decoder{
 public:
-    DecodeRes getType(int first,int second,int third,int fourth){
+    int cnt = 0;
+
+    DecodeRes getType(unsigned char first,unsigned char second,unsigned char third,unsigned char fourth){
         DecodeRes current;
-        int order[4];
+        current.serial = ++ cnt;
+        unsigned char order[4];
         order[0] = fourth;
         order[1] = third;
         order[2] = second;
@@ -211,6 +221,14 @@ public:
             current.imm = current.imm << 8;
             current.imm += (order[2] >> 4) & 0b01111;
             current.imm = current.imm << 12;
+        }
+        current.q1 = rf.dependency[current.rs1];
+        if(rf.dependency[current.rs1] == 0){
+            current.v1 = rf.value[current.rs1];
+        }
+        current.q2 = rf.dependency[current.rs2];
+        if(rf.dependency[current.rs2] == 0){
+            current.v2 = rf.value[current.rs2];
         }
         return current;
     }
