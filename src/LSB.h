@@ -2,26 +2,24 @@
 #include "Type.h"
 #include "reg.h"
 #include "Queue.h"
+#include "Memory.h"
 
 namespace JaneZ{
 struct LSBInfo{
     int serial;
-    Reg<bool> isBusy;
     int Vj;
     int Vk;
     Operation op;
     int des;
     int imm;
-    void tick(){
-        isBusy.flush();
-    }
 };
 
 struct LSBOutput{
-     res;
-    bool isRead;
+    int value = 0;
+    int serial;
+    bool flag;
 };
-    
+
 class LSB{
 private:
 public:
@@ -31,65 +29,49 @@ public:
     int cnt = 0;
     bool isAdd;
     LSBInfo input;
-    LSBInfo output;
+    MemInput output;
+    MemOutput message;
+    LSBOutput lsboutput;
 
-    void run() {
+    //interface
+    void Queue() {
         if(isAdd){
             lsb[tail.current] = input;
-            tail.update(tail.current + 1);
+            tail.update((tail.current + 1)%1000);
         }
         LSBInfo b = lsb[head.current];
         if(cnt == 0){
-            if(!b.isBusy.current){
+            if(head.current != tail.current){
                 cnt = (cnt + 1) % 3;
-                head.update(head.current + 1);
-                LSBInfo res;
-                if(b.op == LB){
-                    //TODO
-                    output = res;
-                   
-                }else if(b.op == LBU){
-                    //TODO
-                    output = res;
-                    
-                }else if(b.op == LH){
-                    //TODO
-                    output = res;
-                    
-                }else if(b.op == LHU){
-                    //TODO
-                    output = res;
-                    
-                }else if(b.op == LW){
-                    //TODO
-                    output = res;
-                    
-                }else if(b.op == SB){
-
-                }else if(b.op == SH){
-
-                }else if(b.op == SW){
-
-                }
-                b.isBusy.current = true;
-                b.isBusy.update(b.isBusy.current);
+                head.update((head.current + 1)%1000);
+                output.addr = b.Vj + b.imm;
+                output.op = b.op;
+                output.flag = true;
+                output.serial = b.serial;
+                output.value = b.Vk;
             }else{
                 cnt = 0;
             }
         }else{
             cnt = (cnt + 1) % 3;
         }
-        if(cnt == 3){
-            //TODO
-        }else{
-            //TODO
-        }
     }
 
+    void RMB(){
+        lsboutput.serial = message.serial;
+        lsboutput.value = message.value;
+        lsboutput.flag = message.flag;
+    }
+
+    void run(){
+        Queue();
+        RMB();
+    }
+    
+
     void tick() {
-        for(int i = 0;i < 1000;i ++){
-            lsb[i].tick();
-        }
+        head.flush();
+        tail.flush();
     }
 };
 }
