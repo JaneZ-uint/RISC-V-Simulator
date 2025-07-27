@@ -12,6 +12,7 @@ struct LSBInfo{
     Operation op;
     int des;
     int imm;
+    bool isAdd;
 };
 
 struct LSBOutput{
@@ -27,7 +28,6 @@ public:
     Reg<int> head = {0,0};
     Reg<int> tail = {0,0};
     int cnt = 0;
-    bool isAdd;
     LSBInfo input;
     MemInput output;
     MemOutput message;
@@ -35,9 +35,10 @@ public:
 
     //interface
     void Queue() {
-        if(isAdd){
+        if(input.isAdd){
             lsb[tail.current] = input;
             tail.update((tail.current + 1)%1000);
+            input.isAdd = false;
         }
         LSBInfo b = lsb[head.current];
         if(cnt == 0){
@@ -68,7 +69,6 @@ public:
         RMB();
     }
     
-
     void tick() {
         head.flush();
         tail.flush();

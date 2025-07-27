@@ -21,60 +21,62 @@ public:
     unsigned char mem[MEMSize] = {};
     MemInput input;
     MemOutput output;
+    MemOutput outputbuffer;
     bool isWork = false;
+    int timer = 0;
 
     void run(){
         if(input.flag){
             switch (input.op) {
                 case LB: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     if((mem[input.addr] >> 7) & 1){
-                        output.value = mem[input.addr] & 0xffffff00;
+                        outputbuffer.value = mem[input.addr] & 0xffffff00;
                     }else{
-                        output.value = mem[input.addr];
+                        outputbuffer.value = mem[input.addr];
                     }
                     break;
                 }
                 case LBU: {
-                    output.serial = input.serial;
-                    output.value = mem[input.addr];
+                    outputbuffer.serial = input.serial;
+                    outputbuffer.value = mem[input.addr];
                     break;
                 }
                 case LH: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     int reverse = (mem[input.addr + 1] << 8) + mem[input.addr];
                     if((reverse >> 15) & 1){
-                        output.value = reverse & 0xffff0000;
+                        outputbuffer.value = reverse & 0xffff0000;
                     }else{
-                        output.value = reverse;
+                        outputbuffer.value = reverse;
                     }
                     break;
                 }
                 case LHU: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     int reverse = (mem[input.addr + 1] << 8) + mem[input.addr];
-                    output.value = reverse;
+                    outputbuffer.value = reverse;
                     break;
                 }
                 case LW: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     int reverse = (mem[input.addr + 3] << 24) + (mem[input.addr + 2] << 16) + (mem[input.addr + 1] << 8) + mem[input.addr];
-                    output.value = reverse;
+                    outputbuffer.value = reverse;
                     break;
                 }
                 case SB: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     mem[input.addr] = input.value;
                     break;
                 }
                 case SH: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     mem[input.addr] = input.value & 0b01111111;
                     mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
                     break;
                 }
                 case SW: {
-                    output.serial = input.serial;
+                    outputbuffer.serial = input.serial;
                     mem[input.addr] = input.value & 0b011111111;
                     mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
                     mem[input.addr + 2] = (input.value >> 16) & 0b011111111;
@@ -83,9 +85,15 @@ public:
                 }
                 default:
                     break;
-
             }
+            timer = 0;
+        }
+        if (timer == 3) {
             output.flag = true;
+            output = outputbuffer;
+        } else {
+            output.flag = false;
+            timer++;
         }
     }
 };
