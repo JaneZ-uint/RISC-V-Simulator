@@ -93,11 +93,13 @@ public:
                 tail.update((tail.current + 1)%1000);
                 break;
             }
+            case EXIT: {
+                break;
+            }
             case JAL:
             case JALR:
             case AUIPC:
             case LUI:
-            case EXIT:
                 printf("Never reach here!");
                 break;
             }

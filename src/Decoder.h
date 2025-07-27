@@ -104,6 +104,9 @@ public:
             current.rs1 += (order[2] >> 7) & 1;
             current.imm = order[0] << 4;
             current.imm += order[1] >> 4;
+            if(current.op == ADDI && current.rs1 == 0 && current.rd == 10 && current.imm == 255){
+                current.op = EXIT;
+            }
             if(func == 5 || func == 1){  //Type I*
                 current.imm = current.imm & 0b011111;
             }

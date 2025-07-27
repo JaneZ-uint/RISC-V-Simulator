@@ -4,6 +4,7 @@
 #include "output.h"
 #include "Type.h"
 #include "reg.h"
+extern bool isTerminal;
 
 namespace JaneZ{
 struct RoBInfo{
@@ -49,7 +50,11 @@ private:
                 input.value.update(res);
                 rob[tail.current] = input;
                 tail.update((tail.current + 1)%1000);
-            }else{
+            } else if (input.op == EXIT) {
+                rob[tail.current] = input;
+                rob[tail.current].isReady.update(true);
+                tail.update((tail.current + 1)%1000);
+            } else{
                 output.des2 = input.des;
                 output.serial2 = input.serial;
                 rob[tail.current] = input;
@@ -61,6 +66,10 @@ private:
 
     void deQue(){
         if(!rob[head.current].isBusy.current && rob[head.current].isReady.current){
+            if(rob[head.current].op == EXIT){
+                isTerminal = true;
+                return;
+            }
             output.des1 = rob[head.current].des;
             output.serial1 = rob[head.current].serial;
             output.value = rob[head.current].value.current;

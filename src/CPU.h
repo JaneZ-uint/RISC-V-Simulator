@@ -122,12 +122,14 @@ public:
 
     //总接口
     unsigned int run(){
-        ++ clk;
-        tick();
-        Wire();
-        Run();
-        
-        return false;
+        while (!isTerminal) {
+            ++ clk;
+            tick();
+            Wire();
+            Run();
+            pc += 4;
+        }
+        return rf.value[0] & 0b011111111;
     }
 
     void tick(){
