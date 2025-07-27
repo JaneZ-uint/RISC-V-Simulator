@@ -1,6 +1,7 @@
 #pragma once
 #include "Queue.h"
 #include "RS.h"
+#include "output.h"
 #include "Type.h"
 #include "reg.h"
 
@@ -14,6 +15,7 @@ struct RoBInfo{
     Operation op;
     int pc;
     int imm;
+    bool isAdd;
 
     void tick(){
         isBusy.flush();
@@ -21,18 +23,12 @@ struct RoBInfo{
         value.flush();
     }
 };
-struct RoBOutput{
-    int des1;
-    int serial1;
-    int des2;
-    int serial2;
-    int value;
-};
 
 class RoB{
 private:
     void enQueue(){
-        if(isAdd){
+        if(input.isAdd){
+            output.flag2 = true;
             if(input.op == JAL){
                 output.des2 = input.des;
                 output.serial2 = input.serial;
@@ -59,6 +55,7 @@ private:
                 rob[tail.current] = input;
                 tail.update((tail.current + 1)%1000);
             }
+            input.isAdd = false;
         }
     }
 
@@ -67,6 +64,7 @@ private:
             output.des1 = rob[head.current].des;
             output.serial1 = rob[head.current].serial;
             output.value = rob[head.current].value.current;
+            output.flag1 = true;
             head.update((head.current + 1)%1000);
         }
     }
@@ -89,9 +87,8 @@ public:
     Reg<int> tail = {0,0};
     RoBInfo input;
     RoBOutput output;
-    bool isAdd;
+    
     RSOutput InfoFromRS;
-
 
     void run(){
         enQueue();

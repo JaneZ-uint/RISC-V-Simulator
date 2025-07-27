@@ -1,4 +1,5 @@
 #pragma once
+#include "output.h"
 #include "Type.h"
 #include "reg.h"
 #include "ALUs.h"
@@ -6,15 +7,10 @@
 #include <cstdio>
 
 namespace JaneZ{
-enum opType{
-    ALU,MEM
-};
-
 struct RSInfo{
     int serial;
     Reg<int> signal;
     Operation op;
-    opType type;
     Reg<int> Vj;
     Reg<int> Vk;
     Reg<int> Qj;
@@ -22,6 +18,7 @@ struct RSInfo{
     int des;
     int imm = 0;
     Reg<int> res;
+    bool isAdd;
 
     void tick(){
         signal.flush();
@@ -32,12 +29,6 @@ struct RSInfo{
     }
 };
 
-struct RSOutput{
-    int serial;
-    int res;
-    bool flag;
-};
-
 class RS{
 public:
     RSInfo rsALU[1000];
@@ -46,14 +37,15 @@ public:
     Reg<int> tail = {0,0};
     RSInfo input;
     RSOutput output;
-    bool isAdd;
+    
     class ALU alu;
     class LSB lsb;
     LSBInfo lsbinfo;
     LSBOutput lsboutput;
+    RoBOutput specialcheckOutput;
 
     void Enqueue(){
-        if(isAdd){
+        if(input.isAdd){
             switch (input.op) {
             case ADD:
             case SUB:
@@ -83,7 +75,7 @@ public:
                 for(int i = 0;i < 1000;i ++){
                     if(rsALU[i].signal.current == 0){
                         rsALU[i] = input;
-                        rsALU[i].signal.update(true);
+                        rsALU[i].signal.update(1);
                         break;
                     }
                 }
@@ -109,6 +101,7 @@ public:
                 printf("Never reach here!");
                 break;
             }
+            input.isAdd = false;
         }
     }
 
@@ -163,6 +156,7 @@ public:
                     lsbinfo.serial = rsLSB[i].serial;
                     lsbinfo.Vj = rsLSB[i].Vj.current;
                     lsbinfo.Vk = rsLSB[i].Vk.current;
+                    lsbinfo.isAdd = true;
                     rsLSB[i].signal.update(2);
                     break;
                 }
@@ -205,10 +199,40 @@ public:
         }
     }
 
+    void specialCheck(){
+        if(specialcheckOutput.flag1){
+            for(int i = 0;i < 1000;i ++){
+                if(rsALU[i].signal.current == 1){
+                    if(rsALU[i].Qj.current == specialcheckOutput.serial1){
+                        rsALU[i].Qj.update(0);
+                        rsALU[i].Vj.update(specialcheckOutput.value);
+                    }
+                    if(rsALU[i].Qk.current == specialcheckOutput.serial1){
+                        rsALU[i].Qk.update(0);
+                        rsALU[i].Vk.update(specialcheckOutput.value);
+                    }
+                }
+            }
+            for(int i = 0;i < 1000;i ++){
+                if(rsLSB[i].signal.current == 1){
+                    if(rsLSB[i].Qj.current == specialcheckOutput.serial1){
+                        rsLSB[i].Qj.update(0);
+                        rsLSB[i].Vj.update(specialcheckOutput.value);
+                    }
+                    if(rsLSB[i].Qk.current == specialcheckOutput.serial1){
+                        rsLSB[i].Qk.update(0);
+                        rsLSB[i].Vk.update(specialcheckOutput.value);
+                    }
+                }
+            }    
+        }
+    }
+
     //interface
     void run(){
         Enqueue();
         Check();
+        specialCheck();
         Deque();
     }
 
