@@ -13,7 +13,7 @@ namespace JaneZ{
 
 class CPU{
 private:
-    void WireFromDecoderToRoB(){
+    void WireFromDecoderToRoBRS(){
         DecodeRes res = decoder.getType(memory.mem[pc],memory.mem[pc + 1] , 
             memory.mem[pc + 2], memory.mem[pc + 3]);
         rob.input.serial = res.serial;
@@ -23,9 +23,22 @@ private:
         rob.input.op = res.op;
         rob.input.imm = res.imm;
         rob.input.isAdd = true;
+        rs.input.serial = res.serial;
+        rs.input.op = res.op;
+        rs.input.des = res.rd;
+        rs.input.imm = res.imm;
+        rs.input.Qj.update(rf.dependency[res.rs1]);
+        rs.input.Qk.update(rf.dependency[res.rs2]);
+        if(rf.dependency[res.rs1] == 0){
+            rs.input.Vj.update(rf.value[res.rs1]);
+        }
+        if(rf.dependency[res.rs2] == 0){
+            rs.input.Vk.update(rf.value[res.rs2]);
+        }
+        rs.input.isAdd = true;
     }
 
-    void WireFromDecoderToRS(){
+    /*void WireFromDecoderToRS(){
         DecodeRes res = decoder.getType(memory.mem[pc],memory.mem[pc + 1] , 
             memory.mem[pc + 2], memory.mem[pc + 3]);
         rs.input.serial = res.serial;
@@ -41,6 +54,13 @@ private:
             rs.input.Vk.update(rf.value[res.rs2]);
         }
         rs.input.isAdd = true;
+    }*/
+
+    void WireFromRoBToCPU(){
+        if(rob.robpc.flag){
+            pc += rob.robpc.offset;
+            rob.robpc.flag = false;
+        }
     }
 
     //Special check
@@ -140,8 +160,9 @@ public:
     }
 
     void Wire(){
-        WireFromDecoderToRoB();
-        WireFromDecoderToRS();
+        WireFromDecoderToRoBRS();
+        //WireFromDecoderToRS();
+        WireFromRoBToCPU();
         WireFromRoBToRS();
         WireFromRoBToRF();
         WireFromRSToRoB();

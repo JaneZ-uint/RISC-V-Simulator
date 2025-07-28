@@ -1,6 +1,4 @@
 #pragma once
-#include "Queue.h"
-#include "RS.h"
 #include "output.h"
 #include "Type.h"
 #include "reg.h"
@@ -23,6 +21,11 @@ struct RoBInfo{
         isReady.flush();
         value.flush();
     }
+};
+
+struct RoBPC{
+    bool flag;
+    int offset;
 };
 
 class RoB{
@@ -70,6 +73,23 @@ private:
                 isTerminal = true;
                 return;
             }
+            switch (rob[head.current].op) {
+                case BEQ:
+                case BGE:
+                case BGEU:
+                case BLT:
+                case BLTU: 
+                case BNE:
+                case JAL:
+                case JALR: {
+                    robpc.flag = true;
+                    robpc.offset = rob[head.current].imm;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
             output.des1 = rob[head.current].des;
             output.serial1 = rob[head.current].serial;
             output.value = rob[head.current].value.current;
@@ -98,6 +118,7 @@ public:
     RoBOutput output;
     
     RSOutput InfoFromRS;
+    RoBPC robpc;
 
     void run(){
         enQueue();

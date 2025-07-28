@@ -210,7 +210,7 @@ public:
             current.imm = order[0];
             current.imm = current.imm << 8;
             current.imm += order[1];
-            current.imm = current.imm << 8;
+            current.imm = current.imm << 4;
             current.imm += (order[2] >> 4) & 0b01111;
             current.imm = current.imm << 12;
         }else if(opcode == 0b0010111){  //Type U auipc
@@ -221,7 +221,7 @@ public:
             current.imm = order[0];
             current.imm = current.imm << 8;
             current.imm += order[1];
-            current.imm = current.imm << 8;
+            current.imm = current.imm << 4;
             current.imm += (order[2] >> 4) & 0b01111;
             current.imm = current.imm << 12;
         }
