@@ -1,6 +1,7 @@
 #pragma once
 #include "RF.h"
 #include "Type.h"
+#include <exception>
 extern JaneZ::RF rf;
 
 namespace JaneZ{
@@ -107,6 +108,11 @@ public:
             if(current.op == ADDI && current.rs1 == 0 && current.rd == 10 && current.imm == 255){
                 current.op = EXIT;
             }
+            if(current.op == ADDI || current.op == ANDI || current.op == ORI || current.op == XORI || current.op == SLTI){
+                if(current.imm >> 11){
+                    current.imm = current.imm | 0xfffff000;
+                }
+            }
             if(func == 5 || func == 1){  //Type I*
                 current.imm = current.imm & 0b011111;
             }
@@ -131,6 +137,9 @@ public:
             current.rs1 += (order[2] >> 7) & 1;
             current.imm = order[0] << 4;
             current.imm += order[1] >> 4;
+            if(current.imm >> 11){
+                current.imm = current.imm | 0xfffff000;
+            }
         }else if(opcode == 0b1100111){  //Type I jalr 67
             current.op = JALR;
             current.rd = order[2] & 0b01111;
@@ -158,6 +167,9 @@ public:
             current.imm = current.imm << 5;
             current.imm += (order[2] & 0b01111) << 1;
             current.imm += (order[3] >> 7) & 1;
+            if(current.imm >> 11){
+                current.imm = current.imm | 0xfffff000;
+            }
         }else if(opcode == 0b1100011){  //Type B 63 E3
             int func = 0;
             func = (order[2] >> 4 ) & 0b0111;
@@ -212,7 +224,10 @@ public:
             current.imm += order[1];
             current.imm = current.imm << 4;
             current.imm += (order[2] >> 4) & 0b01111;
-            current.imm = current.imm << 12;
+            if(current.imm >> 19){
+                current.imm = current.imm | 0xfff00000;
+            }
+            // current.imm = current.imm << 12;
         }else if(opcode == 0b0010111){  //Type U auipc
             current.op = AUIPC;
             current.rd = order[2] & 0b01111;
@@ -223,7 +238,10 @@ public:
             current.imm += order[1];
             current.imm = current.imm << 4;
             current.imm += (order[2] >> 4) & 0b01111;
-            current.imm = current.imm << 12;
+            if(current.imm >> 19){
+                current.imm = current.imm | 0xfff00000;
+            }
+            //current.imm = current.imm << 12;
         }
         current.q1 = rf.dependency[current.rs1];
         if(rf.dependency[current.rs1] == 0){

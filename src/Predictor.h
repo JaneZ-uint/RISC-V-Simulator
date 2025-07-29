@@ -3,13 +3,19 @@
 #include "reg.h"
 
 namespace JaneZ{
+struct PredictorOutput{
+    int new_pc;
+    int serial;
+    bool flag = false;
+};
+
 class Predictor{
 struct BranchInfo{
     int pc;
     int offset;
     Operation op;
     int serial;
-    Reg<bool> flag;
+    Reg<bool> flag = {false,false};
 
     void tick(){
         flag.flush();
@@ -20,12 +26,6 @@ struct ALUInfo{
     int serial;
     int res;
 };
-
-struct PredictorOutput{
-    int new_pc;
-    int serial;
-};
-
 public:
     BranchInfo predictor[1000];
     BranchInfo input;
@@ -43,15 +43,18 @@ public:
                 //wrong
                 output.new_pc = input.pc + input.offset;
                 output.serial = input.serial;
+                output.flag = true;
                 flush();
             }
         }
     }
 
     void flush(){
-        for(int i = output.serial;i < 1000;i ++){
-            if(predictor[i].flag.current){
-                predictor[i].flag.update(false);
+        if(output.flag){
+            for(int i = output.serial;i < 1000;i ++){
+                if(predictor[i].flag.current){
+                    predictor[i].flag.update(false);
+                }
             }
         }
     }

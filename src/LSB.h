@@ -1,8 +1,8 @@
 #pragma once
 #include "Type.h"
 #include "reg.h"
-#include "Queue.h"
 #include "Memory.h"
+#include "Predictor.h"
 
 namespace JaneZ{
 struct LSBInfo{
@@ -12,13 +12,13 @@ struct LSBInfo{
     Operation op;
     int des;
     int imm;
-    bool isAdd;
+    bool isAdd = false;
 };
 
 struct LSBOutput{
     int value = 0;
     int serial;
-    bool flag;
+    bool flag = false;
 };
 
 class LSB{
@@ -32,6 +32,7 @@ public:
     MemInput output;
     MemOutput message;
     LSBOutput lsboutput;
+    PredictorOutput info;
 
     //interface
     void Queue() {
@@ -66,12 +67,44 @@ public:
 
     void run(){
         Queue();
+        flush();
         RMB();
     }
     
     void tick() {
         head.flush();
         tail.flush();
+    }
+
+    void flush(){
+        if(info.flag){
+            if(head.current < tail.current){
+                for(int i = head.current;i < tail.current;i ++){
+                    if(lsb[i].serial >= info.serial){
+                        tail.update(i);
+                        break;
+                    }
+                }
+            }else if(head.current > tail.current){
+                bool signal = false;
+                for(int i = head.current;i < 1000;i ++){
+                    if(lsb[i].serial >= info.serial){
+                        tail.update(i);
+                        signal = true;
+                        break;
+                    }
+                }
+                if(!signal){
+                    for(int i = 0;i < tail.current;i ++){
+                        if(lsb[i].serial >= info.serial){
+                            tail.update(i);
+                            signal = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 };
 }

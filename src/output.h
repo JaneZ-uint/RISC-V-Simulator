@@ -5,7 +5,7 @@ namespace JaneZ {
         int des1;
         int serial1;
         int value;
-        bool flag1;
+        bool flag1 = false;
     
         int des2;
         int serial2;
@@ -15,6 +15,6 @@ namespace JaneZ {
     struct RSOutput{
         int serial;
         int res;
-        bool flag;
+        bool flag = false;
     };
 }

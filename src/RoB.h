@@ -1,8 +1,11 @@
 #pragma once
 #include "output.h"
 #include "Type.h"
+#include "RF.h"
 #include "reg.h"
+#include "Predictor.h"
 extern bool isTerminal;
+extern JaneZ::RF rf;
 
 namespace JaneZ{
 struct RoBInfo{
@@ -14,7 +17,8 @@ struct RoBInfo{
     Operation op;
     int pc;
     int imm;
-    bool isAdd;
+    bool isAdd = false;
+    int rs1;
 
     void tick(){
         isBusy.flush();
@@ -24,8 +28,15 @@ struct RoBInfo{
 };
 
 struct RoBPC{
-    bool flag;
+    bool flag = false;
+    int v1;
     int offset;
+    int pc;
+    bool isJALR = false;
+};
+
+struct RoBToMEM{
+    int serial;
 };
 
 class RoB{
@@ -38,6 +49,7 @@ private:
                 output.serial2 = input.serial;
                 input.value.update(input.pc + 4);
                 rob[tail.current] = input;
+                rob[tail.current].isReady.update(true);
                 tail.update((tail.current + 1)%1000);
             }else if(input.op == AUIPC){
                 output.des2 = input.des;
@@ -45,6 +57,7 @@ private:
                 int res = input.imm << 12;
                 input.value.update(input.pc + res);
                 rob[tail.current] = input;
+                rob[tail.current].isReady.update(true);
                 tail.update((tail.current + 1)%1000);
             }else if(input.op == LUI){
                 output.des2 = input.des;
@@ -52,6 +65,7 @@ private:
                 int res = input.imm << 12;
                 input.value.update(res);
                 rob[tail.current] = input;
+                rob[tail.current].isReady.update(true);
                 tail.update((tail.current + 1)%1000);
             } else if (input.op == EXIT) {
                 rob[tail.current] = input;
@@ -68,7 +82,7 @@ private:
     }
 
     void deQue(){
-        if(!rob[head.current].isBusy.current && rob[head.current].isReady.current){
+        if(!rob[head.current].isBusy.current && rob[head.current].isReady.current  && head.current != tail.current){
             if(rob[head.current].op == EXIT){
                 isTerminal = true;
                 return;
@@ -80,13 +94,22 @@ private:
                 case BLT:
                 case BLTU: 
                 case BNE:
-                case JAL:
-                case JALR: {
+                case JAL:{
                     robpc.flag = true;
                     robpc.offset = rob[head.current].imm;
+                    robpc.isJALR = false;
+                    robpc.pc = rob[head.current].pc;
                     break;
                 }
+                case JALR: {
+                    robpc.flag = true;
+                    robpc.isJALR = true;
+                    robpc.offset = rob[head.current].imm;
+                    robpc.pc = rob[head.current].pc;
+                    robpc.v1 = rf.value[rob[head.current].rs1];
+                }
                 default: {
+                    robpc.flag = false;
                     break;
                 }
             }
@@ -95,6 +118,7 @@ private:
             output.value = rob[head.current].value.current;
             output.flag1 = true;
             head.update((head.current + 1)%1000);
+
         }
     }
 
@@ -119,11 +143,15 @@ public:
     
     RSOutput InfoFromRS;
     RoBPC robpc;
+    RoBToMEM robtomem;
+    PredictorOutput info;
 
     void run(){
         enQueue();
+        flush();
         deQue();
         update();
+        robtomem.serial = rob[head.current].serial;
     }
 
     void tick(){
@@ -135,7 +163,34 @@ public:
     }
 
     void flush(){
-        //TODO
+        if(info.flag){
+            if(head.current < tail.current){
+                for(int i = head.current;i < tail.current;i ++){
+                    if(rob[i].serial >= info.serial){
+                        tail.update(i);
+                        break;
+                    }
+                }
+            }else if(head.current > tail.current){
+                bool signal = false;
+                for(int i = head.current;i < 1000;i ++){
+                    if(rob[i].serial >= info.serial){
+                        tail.update(i);
+                        signal = true;
+                        break;
+                    }
+                }
+                if(!signal){
+                    for(int i = 0;i < tail.current;i ++){
+                        if(rob[i].serial >= info.serial){
+                            tail.update(i);
+                            signal = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 };
 }

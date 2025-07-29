@@ -23,19 +23,23 @@ private:
         rob.input.op = res.op;
         rob.input.imm = res.imm;
         rob.input.isAdd = true;
+        rob.input.rs1 = res.rs1;
         rs.input.serial = res.serial;
         rs.input.op = res.op;
         rs.input.des = res.rd;
         rs.input.imm = res.imm;
-        rs.input.Qj.update(rf.dependency[res.rs1]);
-        rs.input.Qk.update(rf.dependency[res.rs2]);
+        rs.input.Qj = rf.dependency[res.rs1];
+        rs.input.Qk = rf.dependency[res.rs2];
         if(rf.dependency[res.rs1] == 0){
-            rs.input.Vj.update(rf.value[res.rs1]);
+            rs.input.Vj = rf.value[res.rs1];
         }
         if(rf.dependency[res.rs2] == 0){
-            rs.input.Vk.update(rf.value[res.rs2]);
+            rs.input.Vk = rf.value[res.rs2];
         }
         rs.input.isAdd = true;
+        if(res.op == JAL){
+            pc = pc + res.imm - 4;
+        }
     }
 
     /*void WireFromDecoderToRS(){
@@ -58,7 +62,11 @@ private:
 
     void WireFromRoBToCPU(){
         if(rob.robpc.flag){
-            pc += rob.robpc.offset;
+            if (rob.robpc.isJALR) {
+                pc = rob.robpc.v1 + rob.robpc.offset;
+            }else {
+                pc = rob.robpc.offset + rob.robpc.pc;
+            }          
             rob.robpc.flag = false;
         }
     }
@@ -127,6 +135,35 @@ private:
         }
     }
 
+    void WireFromRoBToMem(){
+        memory.inforomrob.serial = rob.robtomem.serial;
+    }
+
+    void WireFromPredictorToCPU(){
+        if(predictor.output.flag){
+            pc = predictor.output.new_pc;
+        }
+    }
+
+    void WireFromPredictorToLSB(){
+        if(predictor.output.flag){
+            lsb.info = predictor.output;
+        }
+    }
+
+    void WireFromPredictorToRoB(){
+        if(predictor.output.flag){
+            rob.info = predictor.output;
+        }
+    }
+
+    void WireFromPredictorToRS(){
+        if(predictor.output.flag){
+            rs.info = predictor.output;
+        }
+        predictor.output.flag = false;
+    }
+
 public:
     CPU() = default;
 
@@ -147,6 +184,7 @@ public:
             tick();
             Wire();
             Run();
+
             pc += 4;
         }
         return rf.value[0] & 0b011111111;
@@ -160,16 +198,21 @@ public:
     }
 
     void Wire(){
+        WireFromRoBToRF();
         WireFromDecoderToRoBRS();
         //WireFromDecoderToRS();
         WireFromRoBToCPU();
         WireFromRoBToRS();
-        WireFromRoBToRF();
         WireFromRSToRoB();
         WireFromRSToLSB();
         WireFromLSBToMem();
         WireFromMemToLSB();
         WireFromLSBToRS();
+        WireFromRoBToMem();
+        WireFromPredictorToCPU();
+        WireFromPredictorToLSB();
+        WireFromPredictorToRoB();
+        WireFromPredictorToRS();
     }
 
     void Run(){
@@ -179,5 +222,7 @@ public:
         rob.run();
         rs.run();
     }
+
+    
 };
 }
