@@ -1,7 +1,6 @@
 #pragma once
 #include "output.h"
 #include "Type.h"
-#include "reg.h"
 #include "ALUs.h"
 #include "LSB.h"
 #include "Predictor.h"
@@ -92,6 +91,7 @@ public:
             case SH:
             case SW: {
                 rsLSB[tail] = input;
+                rsLSB[tail].signal = 1;
                 tail = (tail + 1) % 1000;
                 break;
             }

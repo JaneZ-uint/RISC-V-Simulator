@@ -9,7 +9,7 @@ namespace JaneZ {
     
         int des2;
         int serial2;
-        bool flag2;
+        bool flag2 = false;
     };
     
     struct RSOutput{

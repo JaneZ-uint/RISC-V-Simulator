@@ -163,6 +163,7 @@ public:
             current.rs1 += (order[2] >> 7) & 1;
             current.rs2 = (order[0] & 1) << 4;
             current.rs2 += (order[1] >> 4) & 0b01111;
+            current.rd = current.rs2;
             current.imm = order[0] >> 1;
             current.imm = current.imm << 5;
             current.imm += (order[2] & 0b01111) << 1;
