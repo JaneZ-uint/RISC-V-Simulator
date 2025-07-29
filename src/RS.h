@@ -212,6 +212,7 @@ public:
                     break;
                 }
             }
+            lsboutput.flag = false;
         }
     }
 
