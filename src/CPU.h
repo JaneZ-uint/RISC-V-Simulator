@@ -16,6 +16,9 @@ private:
     void WireFromDecoderToRoBRS(){
         DecodeRes res = decoder.getType(memory.mem[pc],memory.mem[pc + 1] , 
             memory.mem[pc + 2], memory.mem[pc + 3]);
+        if (res.op == JALR) {
+            isStop = true;
+        }
         rob.input.serial = res.serial;
         rob.input.des = res.rd;
         rob.input.imm = res.imm;
@@ -129,6 +132,12 @@ private:
         }
     }
 
+    void WireFromLSBToRoB(){
+        if(lsb.lsboutput.flag){
+            rob.InfoFromLSB = lsb.lsboutput;
+        }
+    }
+
     void WireFromLSBToRS(){
         if(lsb.lsboutput.flag){
             rs.lsboutput = lsb.lsboutput;
@@ -136,8 +145,8 @@ private:
         }
     }
 
-    void WireFromRoBToMem(){
-        memory.inforomrob.serial = rob.robtomem.serial;
+    void WireFromRoBToLSB(){
+        lsb.infofromrob.serial = rob.robtomem.serial;
     }
 
     void WireFromPredictorToCPU(){
@@ -177,6 +186,7 @@ public:
     RS rs;
     uint32_t pc;
     int clk = 0;
+    bool isStop = false;
 
     //总接口
     unsigned int run(){
@@ -185,6 +195,7 @@ public:
             tick();
             Wire();
             Run();
+            JALRCheck();
 
             pc += 4;
         }
@@ -201,15 +212,20 @@ public:
     void Wire(){
         WireFromRoBToRS();
         WireFromRoBToRF();
-        WireFromDecoderToRoBRS();
+        if(!isStop){
+            WireFromDecoderToRoBRS();
+        }else{
+            pc -= 4;
+        }
         //!!!TODO 暂时性注释掉for debugging
-        //WireFromRoBToCPU();
+        WireFromRoBToCPU();
         WireFromRSToRoB();
         WireFromRSToLSB();
         WireFromLSBToMem();
         WireFromMemToLSB();
+        WireFromLSBToRoB();
         WireFromLSBToRS();
-        WireFromRoBToMem();
+        WireFromRoBToLSB();
         WireFromPredictorToCPU();
         WireFromPredictorToLSB();
         WireFromPredictorToRoB();
@@ -224,6 +240,11 @@ public:
         rs.run();
     }
 
+    void JALRCheck(){
+        if(rob.jalrsignal.isOK){
+            isStop = false;
+        }
+    }
     
 };
 }
