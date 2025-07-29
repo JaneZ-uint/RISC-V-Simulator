@@ -1,6 +1,5 @@
 #pragma once
 #include "Type.h"
-#include "reg.h"
 #include "Memory.h"
 #include "Predictor.h"
 
@@ -25,27 +24,33 @@ class LSB{
 private:
 public:
     LSBInfo lsb[1000];
-    Reg<int> head = {0,0};
-    Reg<int> tail = {0,0};
+    int head = 0;
+    int tail = 0;
     int cnt = 0;
     LSBInfo input;
     MemInput output;
     MemOutput message;
     LSBOutput lsboutput;
     PredictorOutput info;
+    InfoFromRoB infofromrob;
 
     //interface
     void Queue() {
         if(input.isAdd){
-            lsb[tail.current] = input;
-            tail.update((tail.current + 1)%1000);
+            lsb[tail] = input;
+            tail = (tail + 1)%1000;
             input.isAdd = false;
         }
-        LSBInfo b = lsb[head.current];
+        LSBInfo b = lsb[head];
         if(cnt == 0){
-            if(head.current != tail.current){
+            if(head != tail){
+                if(b.op == SB || b.op == SH || b.op == SW){
+                    if(b.serial != infofromrob.serial){
+                        return;
+                    }
+                }
                 cnt = (cnt + 1) % 3;
-                head.update((head.current + 1)%1000);
+                head = (head + 1) % 1000;
                 output.addr = b.Vj + b.imm;
                 output.op = b.op;
                 output.flag = true;
@@ -63,6 +68,7 @@ public:
         lsboutput.serial = message.serial;
         lsboutput.value = message.value;
         lsboutput.flag = message.flag;
+        message.flag = false;
     }
 
     void run(){
@@ -72,32 +78,32 @@ public:
     }
     
     void tick() {
-        head.flush();
-        tail.flush();
+        // head.flush();
+        // tail.flush();
     }
 
     void flush(){
         if(info.flag){
-            if(head.current < tail.current){
-                for(int i = head.current;i < tail.current;i ++){
+            if(head < tail){
+                for(int i = head;i < tail;i ++){
                     if(lsb[i].serial >= info.serial){
-                        tail.update(i);
+                        tail = i;
                         break;
                     }
                 }
-            }else if(head.current > tail.current){
+            }else if(head > tail){
                 bool signal = false;
-                for(int i = head.current;i < 1000;i ++){
+                for(int i = head;i < 1000;i ++){
                     if(lsb[i].serial >= info.serial){
-                        tail.update(i);
+                        tail = i;
                         signal = true;
                         break;
                     }
                 }
                 if(!signal){
-                    for(int i = 0;i < tail.current;i ++){
+                    for(int i = 0;i < tail;i ++){
                         if(lsb[i].serial >= info.serial){
-                            tail.update(i);
+                            tail = i;
                             signal = true;
                             break;
                         }
