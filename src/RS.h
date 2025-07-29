@@ -151,7 +151,7 @@ public:
             }
         }
         //rsLSB 
-        for(int i = 0;i < 1000;i ++){
+        /*for(int i = 0;i < 1000;i ++){
             if(rsLSB[i].Qj == 0 && rsLSB[i].Qk == 0){
                 if(rsLSB[i].signal == 1){
                     lsbinfo.des = rsLSB[i].des;
@@ -165,12 +165,24 @@ public:
                     break;
                 }
             }
+        }*/
+        if(rsLSB[head].Qj == 0 && rsLSB[head].Qk == 0){
+            if(rsLSB[head].signal == 1){
+                lsbinfo.des = rsLSB[head].des;
+                lsbinfo.imm = rsLSB[head].imm;
+                lsbinfo.op = rsLSB[head].op;
+                lsbinfo.serial = rsLSB[head].serial;
+                lsbinfo.Vj = rsLSB[head].Vj;
+                lsbinfo.Vk = rsLSB[head].Vk;
+                lsbinfo.isAdd = true;
+                rsLSB[head].signal = 2;
+            }
         }
     }
 
     void Deque(){
         if(lsboutput.flag){
-            for(int i = 0;i < 1000;i ++){
+            for(int i = 0;i < 1000;i ++){ 
                 if(lsboutput.serial == rsLSB[i].serial){
                     for(int j = 0;j < 1000;j ++){
                         if(rsLSB[j].signal == 1){

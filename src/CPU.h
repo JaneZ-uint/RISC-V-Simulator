@@ -110,6 +110,7 @@ private:
             lsb.input.serial = rs.lsbinfo.serial;
             lsb.input.Vj = rs.lsbinfo.Vj;
             lsb.input.Vk = rs.lsbinfo.Vk;
+            lsb.input.isAdd = true;
             rs.lsbinfo.isAdd = false;
         }
     }
@@ -201,8 +202,8 @@ public:
         WireFromRoBToRS();
         WireFromRoBToRF();
         WireFromDecoderToRoBRS();
-        //WireFromDecoderToRS();
-        WireFromRoBToCPU();
+        //!!!TODO 暂时性注释掉for debugging
+        //WireFromRoBToCPU();
         WireFromRSToRoB();
         WireFromRSToLSB();
         WireFromLSBToMem();
