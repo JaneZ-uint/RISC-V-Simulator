@@ -74,9 +74,9 @@ private:
     //Special check
     void WireFromRoBToRS(){
         if(rob.output.flag1){
-            rs.specialcheckOutput.serial1 = rob.output.serial1;
-            rs.specialcheckOutput.des1 = rob.output.des1;
-            rs.specialcheckOutput.value = rob.output.value;
+            rs.specialcheckOutput = rob.output;
+            // rs.specialcheckOutput.des1 = rob.output.des1;
+            // rs.specialcheckOutput.value = rob.output.value;
         }
     }
 
@@ -198,11 +198,11 @@ public:
     }
 
     void Wire(){
+        WireFromRoBToRS();
         WireFromRoBToRF();
         WireFromDecoderToRoBRS();
         //WireFromDecoderToRS();
         WireFromRoBToCPU();
-        WireFromRoBToRS();
         WireFromRSToRoB();
         WireFromRSToLSB();
         WireFromLSBToMem();
