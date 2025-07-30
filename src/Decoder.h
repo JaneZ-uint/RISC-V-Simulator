@@ -219,8 +219,8 @@ public:
             current.imm = current.imm << 3;
             current.imm += (order[1] >> 5) & 0b0111;
             current.imm = current.imm << 1;
-            if(current.imm >> 19){
-                current.imm = current.imm | 0xfff00000;
+            if(current.imm >> 20){
+                current.imm = current.imm | 0xffe00000;
             }
         }else if(opcode == 0b0110111){  //Type U lui 37 
             current.op = LUI;

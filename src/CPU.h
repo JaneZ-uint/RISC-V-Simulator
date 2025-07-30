@@ -158,34 +158,43 @@ private:
     }
 
     void WireFromPredictorToCPU(){
-        if(predictor.output.flag){
-            pc = predictor.output.new_pc;
+        if(rob.isFlush.flag){
+            pc = rob.isFlush.new_pc;
         }
     }
 
     void WireFromPredictorToLSB(){
-        if(predictor.output.flag){
-            lsb.info = predictor.output;
+        if(rob.isFlush.flag){
+            lsb.info = rob.isFlush;
         }
     }
 
     void WireFromPredictorToRoB(){
-        if(predictor.output.flag){
-            rob.info = predictor.output;
+        if(rob.isFlush.flag){
+            rob.info = rob.isFlush;
+            isStop = false;
         }
     }
 
     void WireFromPredictorToRS(){
-        if(predictor.output.flag){
-            rs.info = predictor.output;
+        if(rob.isFlush.flag){
+            rs.info = rob.isFlush;
         }
-        predictor.output.flag = false;
+        rob.isFlush.flag = false;
     }
 
     void WireFromRSToPredictor(){
         if(rs.toPredictor.flag){
             predictor.inputALU = rs.toPredictor;
             rs.toPredictor.flag = false;
+        }
+    }
+
+    void WireIsControl(){
+        if(rob.isFlush.flag){
+            for(int i = 0;i < 32;i ++){
+                rf.dependency[i] = 0;
+            }
         }
     }
 
@@ -206,9 +215,6 @@ public:
     //总接口
     unsigned int run(){
         while (!isTerminal) {
-            /*if (rob.head == 61) {
-                printf("Here!");
-            }*/
             ++ clk;
             tick();
             Wire();
@@ -230,6 +236,7 @@ public:
     void Wire(){
         WireFromRoBToRS();
         WireFromRoBToRF();
+        WireIsControl();
         WireFromRoBToCPU();
         WireFromPredictorToCPU();
         if(!isStop){

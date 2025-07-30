@@ -51,14 +51,23 @@ private:
             output.flag2 = true;
             if(input.op == JAL){
                 output.des2 = input.des;
-                output.serial2 = input.serial;
+                if(input.des == 0){
+                    output.serial2 = 0;
+                }else{
+                    output.serial2 = input.serial;
+                }
                 input.value = input.pc + 4;
                 rob[tail] = input;
                 rob[tail].isReady = true;
                 tail = (tail + 1)%1000;
             }else if(input.op == AUIPC){
                 output.des2 = input.des;
-                output.serial2 = input.serial;
+                //output.serial2 = input.serial;
+                if(input.des == 0){
+                    output.serial2 = 0;
+                }else{
+                    output.serial2 = input.serial;
+                }
                 int res = input.imm << 12;
                 input.value = input.pc + res;
                 rob[tail] = input;
@@ -66,7 +75,12 @@ private:
                 tail = (tail + 1)%1000;
             }else if(input.op == LUI){
                 output.des2 = input.des;
-                output.serial2 = input.serial;
+                //output.serial2 = input.serial;
+                if(input.des == 0){
+                    output.serial2 = 0;
+                }else{
+                    output.serial2 = input.serial;
+                }
                 int res = input.imm << 12;
                 input.value = res;
                 rob[tail] = input;
@@ -79,7 +93,12 @@ private:
             } else{
                 if(input.op != SB && input.op != SH && input.op != SW && input.op != BEQ && input.op != BGE && input.op != BGEU && input.op != BLT && input.op != BLTU && input.op != BNE){
                     output.des2= input.des;
-                    output.serial2 = input.serial;
+                    //output.serial2 = input.serial;
+                    if(input.des == 0){
+                        output.serial2 = 0;
+                    }else{
+                        output.serial2 = input.serial;
+                    }
                 }else{
                     output.flag2 = false;
                 }
@@ -106,7 +125,12 @@ private:
                 case BGEU:
                 case BLT:
                 case BLTU: 
-                case BNE:
+                case BNE:{
+                    isFlush.flag = rob[head].value;
+                    isFlush.new_pc = rob[head].pc + rob[head].imm;
+                    isFlush.serial = rob[head].serial;
+                    break;
+                };
                 case JAL:{
                     // robpc.flag = true;
                     // robpc.offset = rob[head].imm;
@@ -129,7 +153,11 @@ private:
             }
             output.des1 = rob[head].des;
             output.serial1 = rob[head].serial;
-            output.value = rob[head].value;
+            if(rob[head].des == 0){
+                output.value = 0;
+            }else{
+                output.value = rob[head].value;
+            }
             output.flag1 = true;
             head = (head + 1)%1000;
         }
@@ -167,10 +195,11 @@ public:
     RSOutput InfoFromRS;
     RoBPC robpc;
     RoBToMEM robtomem;
-    PredictorOutput info;
+    PredictorOutput info, isFlush;
 
     LSBOutput InfoFromLSB;
     JALRSignal jalrsignal;
+    bool isControl = false;
 
     void run(){
         flush();
