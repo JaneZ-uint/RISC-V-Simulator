@@ -206,9 +206,9 @@ public:
     //总接口
     unsigned int run(){
         while (!isTerminal) {
-            if (rob.head == 31) {
+            /*if (rob.head == 61) {
                 printf("Here!");
-            }
+            }*/
             ++ clk;
             tick();
             Wire();
@@ -217,7 +217,7 @@ public:
 
             pc += 4;
         }
-        return rf.value[0] & 0b011111111;
+        return rf.value[10] & 0b011111111;
     }
 
     void tick(){

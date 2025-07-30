@@ -50,23 +50,23 @@ private:
         if(input.isAdd){
             output.flag2 = true;
             if(input.op == JAL){
-                output.des1 = input.des;
-                output.serial1 = input.serial;
+                output.des2 = input.des;
+                output.serial2 = input.serial;
                 input.value = input.pc + 4;
                 rob[tail] = input;
                 rob[tail].isReady = true;
                 tail = (tail + 1)%1000;
             }else if(input.op == AUIPC){
-                output.des1 = input.des;
-                output.serial1 = input.serial;
+                output.des2 = input.des;
+                output.serial2 = input.serial;
                 int res = input.imm << 12;
                 input.value = input.pc + res;
                 rob[tail] = input;
                 rob[tail].isReady = true;
                 tail = (tail + 1)%1000;
             }else if(input.op == LUI){
-                output.des1 = input.des;
-                output.serial1 = input.serial;
+                output.des2 = input.des;
+                output.serial2 = input.serial;
                 int res = input.imm << 12;
                 input.value = res;
                 rob[tail] = input;
@@ -77,9 +77,9 @@ private:
                 rob[tail].isReady = true;
                 tail = (tail + 1)%1000;
             } else{
-                if(input.op != SB && input.op != SH && input.op != SW){
-                    output.des1 = input.des;
-                    output.serial1 = input.serial;
+                if(input.op != SB && input.op != SH && input.op != SW && input.op != BEQ && input.op != BGE && input.op != BGEU && input.op != BLT && input.op != BLTU && input.op != BNE){
+                    output.des2= input.des;
+                    output.serial2 = input.serial;
                 }else{
                     output.flag2 = false;
                 }
@@ -91,7 +91,7 @@ private:
     }
 
     void deQue(){
-        if(rob[head].op == JALR){
+        if(rob[head].op == JALR ){
             rob[head].isReady = true;
             jalrsignal.isOK = true;
         }
