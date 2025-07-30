@@ -9,6 +9,7 @@ int main(){
     std::string op;
     unsigned int currentPos = 0;
     JaneZ::CPU cpu;
+    cpu.pc = 0;
     while(std::cin >> op){
         if(op[0] == '@'){
             std::string addr;
