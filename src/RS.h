@@ -44,6 +44,7 @@ public:
     LSBOutput lsboutput;
     RoBOutput specialcheckOutput;
     PredictorOutput info;
+    ALUInfo toPredictor;
 
     void Enqueue(){
         if(input.isAdd){
@@ -116,6 +117,11 @@ public:
                 if(rsALU[i].signal == 1){
                     rsALU[i].res = alu.execute(ALUInput{rsALU[i].op, rsALU[i].Vj,
                         rsALU[i].Vk,rsALU[i].imm});
+                    if(rsALU[i].op == BEQ || rsALU[i].op == BGE || rsALU[i].op == BGEU || rsALU[i].op == BLT || rsALU[i].op == BLTU || rsALU[i].op == BNE){
+                        toPredictor.serial = rsALU[i].serial;
+                        toPredictor.res = rsALU[i].res;
+                        toPredictor.flag = true;
+                    }
                     rsALU[i].signal = 0;
                     //broadcast
                     //output.des = rsALU[i].des;
@@ -247,8 +253,8 @@ public:
 
     //interface
     void run(){
-        Enqueue();
         flush();
+        Enqueue();
         Check();
         specialCheck();
         Deque();
@@ -265,7 +271,7 @@ public:
         if(info.flag){
             if(head < tail){
                 for(int i = head;i < tail;i ++){
-                    if(rsLSB[i].serial >= info.serial){
+                    if(rsLSB[i].serial > info.serial){
                         tail = i;
                         break;
                     }
@@ -273,7 +279,7 @@ public:
             }else if(head > tail){
                 bool signal = false;
                 for(int i = head;i < 1000;i ++){
-                    if(rsLSB[i].serial >= info.serial){
+                    if(rsLSB[i].serial > info.serial){
                         tail = i;
                         signal = true;
                         break;
@@ -281,7 +287,7 @@ public:
                 }
                 if(!signal){
                     for(int i = 0;i < tail;i ++){
-                        if(rsLSB[i].serial >= info.serial){
+                        if(rsLSB[i].serial > info.serial){
                             tail = i;
                             signal = true;
                             break;
@@ -291,10 +297,11 @@ public:
             }
 
             for (int i = 0; i < 1000; i ++) {
-                if(rsALU[i].serial >= info.serial){
+                if(rsALU[i].serial > info.serial){
                     rsALU[i].signal = 0;
                 }
             }
+            info.flag = false;
         }
     }
 };

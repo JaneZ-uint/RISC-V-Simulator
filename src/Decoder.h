@@ -191,6 +191,7 @@ public:
             current.rs1 += (order[2] >> 7) & 1;
             current.rs2 = (order[0] & 1) << 4;
             current.rs2 += (order[1] >> 4) & 0b01111;
+
             current.imm = (order[0] >> 7) & 1;
             current.imm = current.imm << 1;
             current.imm += (order[3] >> 7) & 1;
@@ -199,6 +200,9 @@ public:
             current.imm = current.imm << 4;
             current.imm += order[2] & 0b01111;
             current.imm = current.imm << 1;
+            if(current.imm >> 12){
+                current.imm = current.imm | 0xffffe000;
+            }
         }else if(opcode == 0b1101111){  //Type J 6F EF
             current.op = JAL;
             current.rd = order[2] & 0b01111;

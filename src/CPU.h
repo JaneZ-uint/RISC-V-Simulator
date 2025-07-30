@@ -7,6 +7,7 @@
 #include "RF.h"
 #include "RoB.h"
 #include "RS.h"
+#include "Type.h"
 #include <cstdint>
 
 namespace JaneZ{
@@ -40,6 +41,13 @@ private:
             rs.input.Vk = rf.value[res.rs2];
         }
         rs.input.isAdd = true;
+        if(res.op == BEQ || res.op == BGE || res.op == BGEU || res.op == BLT || res.op == BLTU || res.op == BNE){
+            predictor.input.offset = res.imm;
+            predictor.input.op = res.op;
+            predictor.input.pc = pc;
+            predictor.input.serial = res.serial;
+            predictor.input.flag = true;
+        }
         if(res.op == JAL){
             pc = pc + res.imm - 4;
         }
@@ -84,14 +92,14 @@ private:
     }
 
     void WireFromRoBToRF(){
+        if(rob.output.flag2){
+            rf.dependency[rob.output.des2] = rob.output.serial2;
+        }
         if(rob.output.flag1){
             rf.value[rob.output.des1] = rob.output.value;
             if(rf.dependency[rob.output.des1] == rob.output.serial1){
                 rf.dependency[rob.output.des1] = 0;
             }
-        }
-        if(rob.output.flag2){
-            rf.dependency[rob.output.des2] = rob.output.serial2;
         }
         rob.output.flag1 = rob.output.flag2 = false;
     }
@@ -174,6 +182,13 @@ private:
         predictor.output.flag = false;
     }
 
+    void WireFromRSToPredictor(){
+        if(rs.toPredictor.flag){
+            predictor.inputALU = rs.toPredictor;
+            rs.toPredictor.flag = false;
+        }
+    }
+
 public:
     CPU() = default;
 
@@ -191,6 +206,9 @@ public:
     //总接口
     unsigned int run(){
         while (!isTerminal) {
+            if (rob.head == 31) {
+                printf("Here!");
+            }
             ++ clk;
             tick();
             Wire();
@@ -212,13 +230,14 @@ public:
     void Wire(){
         WireFromRoBToRS();
         WireFromRoBToRF();
+        WireFromRoBToCPU();
+        WireFromPredictorToCPU();
         if(!isStop){
             WireFromDecoderToRoBRS();
         }else{
             pc -= 4;
         }
         //!!!TODO 暂时性注释掉for debugging
-        WireFromRoBToCPU();
         WireFromRSToRoB();
         WireFromRSToLSB();
         WireFromLSBToMem();
@@ -226,7 +245,7 @@ public:
         WireFromLSBToRoB();
         WireFromLSBToRS();
         WireFromRoBToLSB();
-        WireFromPredictorToCPU();
+        WireFromRSToPredictor();
         WireFromPredictorToLSB();
         WireFromPredictorToRoB();
         WireFromPredictorToRS();
@@ -243,6 +262,7 @@ public:
     void JALRCheck(){
         if(rob.jalrsignal.isOK){
             isStop = false;
+            rob.jalrsignal.isOK = false;
         }
     }
     

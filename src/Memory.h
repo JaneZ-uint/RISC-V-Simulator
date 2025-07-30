@@ -26,19 +26,14 @@ public:
     MemInput input;
     MemOutput output;
     MemOutput outputbuffer;
-    InfoFromRoB inforomrob;
+    //InfoFromRoB inforomrob;
 
     bool isWork = false;
     int timer = 0;
 
     void run(){
         if(input.flag){
-            bool signal = true;
-            if(input.op == SB || input.op == SH || input.op == SW){
-                if(input.op != inforomrob.serial){
-                    signal = false;
-                }
-            }
+            isWork = true;
             switch (input.op) {
                 case LB: {
                     outputbuffer.serial = input.serial;
@@ -77,41 +72,40 @@ public:
                     break;
                 }
                 case SB: {
-                    if(signal){
-                        outputbuffer.serial = input.serial;
-                        mem[input.addr] = input.value;
-                    }
+                    outputbuffer.serial = input.serial;
+                    mem[input.addr] = input.value;
                     break;
                 }
                 case SH: {
-                    if(signal){
-                        outputbuffer.serial = input.serial;
-                        mem[input.addr] = input.value & 0b01111111;
-                        mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
-                    }
+                    outputbuffer.serial = input.serial;
+                    mem[input.addr] = input.value & 0b01111111;
+                    mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
                     break;
                 }
                 case SW: {
-                    if(signal){
-                        outputbuffer.serial = input.serial;
-                        mem[input.addr] = input.value & 0b011111111;
-                        mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
-                        mem[input.addr + 2] = (input.value >> 16) & 0b011111111;
-                        mem[input.addr + 3] = (input.value >> 24) & 0b011111111;
-                    }
+                    outputbuffer.serial = input.serial;
+                    mem[input.addr] = input.value & 0b011111111;
+                    mem[input.addr + 1] = (input.value >> 8) & 0b011111111;
+                    mem[input.addr + 2] = (input.value >> 16) & 0b011111111;
+                    mem[input.addr + 3] = (input.value >> 24) & 0b011111111;
                     break;
                 }
                 default:
                     break;
             }
             timer = 0;
+            input.flag = false;
         }
         if (timer == 3) {
-            output.flag = true;
             output = outputbuffer;
+            output.flag = true;
+            timer = 0;
+            isWork = false;
         } else {
             output.flag = false;
-            timer++;
+            if(isWork){
+                timer ++;
+            }
         }
     }
 };

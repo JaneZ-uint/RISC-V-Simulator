@@ -9,60 +9,62 @@ struct PredictorOutput{
     bool flag = false;
 };
 
-class Predictor{
+struct ALUInfo{
+    int serial;
+    int res;
+    bool flag = false;
+};
+
 struct BranchInfo{
     int pc;
     int offset;
     Operation op;
     int serial;
-    Reg<bool> flag = {false,false};
+    bool flag = false;
 
     void tick(){
-        flag.flush();
+        //flag.flush();
     }
 };
 
-struct ALUInfo{
-    int serial;
-    int res;
-};
+
+class Predictor{
 public:
-    BranchInfo predictor[1000];
+    BranchInfo predictor[100000];
     BranchInfo input;
     ALUInfo inputALU;
     PredictorOutput output;
-    bool isAdd;
-    bool isALU;
     
     void run(){
-        if(isAdd){
+        if(input.flag){
             predictor[input.serial] = input;
+            input.flag = false;
         }
-        if(isALU){
+        if(inputALU.flag){
             if(inputALU.res == 1){
-                //wrong
-                output.new_pc = input.pc + input.offset;
-                output.serial = input.serial;
+                output.new_pc = predictor[inputALU.serial].pc + predictor[inputALU.serial].offset;
+                output.serial = inputALU.serial;
                 output.flag = true;
                 flush();
             }
+            inputALU.flag = false;
         }
     }
 
     void flush(){
-        if(output.flag){
-            for(int i = output.serial;i < 1000;i ++){
-                if(predictor[i].flag.current){
-                    predictor[i].flag.update(false);
-                }
-            }
-        }
+        // if(output.flag){
+        //     for(int i = output.serial;i < 10000;i ++){
+        //         if(predictor[i].flag){
+        //             predictor[i].flag = false;
+        //         }
+        //     }
+        // }
     }
 
     void tick(){
-        for(int i = 0;i < 1000;i ++){
-            predictor[i].tick();
-        }
+        // for(int i = 0;i < 1000;i ++){
+        //     predictor[i].tick();
+        // }
     }
 };
 }

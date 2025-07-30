@@ -86,7 +86,7 @@ public:
         if(info.flag){
             if(head < tail){
                 for(int i = head;i < tail;i ++){
-                    if(lsb[i].serial >= info.serial){
+                    if(lsb[i].serial > info.serial){
                         tail = i;
                         break;
                     }
@@ -94,7 +94,7 @@ public:
             }else if(head > tail){
                 bool signal = false;
                 for(int i = head;i < 1000;i ++){
-                    if(lsb[i].serial >= info.serial){
+                    if(lsb[i].serial > info.serial){
                         tail = i;
                         signal = true;
                         break;
@@ -102,7 +102,7 @@ public:
                 }
                 if(!signal){
                     for(int i = 0;i < tail;i ++){
-                        if(lsb[i].serial >= info.serial){
+                        if(lsb[i].serial > info.serial){
                             tail = i;
                             signal = true;
                             break;
@@ -110,6 +110,7 @@ public:
                     }
                 }
             }
+            info.flag = false;
         }
     }
 };
