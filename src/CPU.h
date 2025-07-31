@@ -255,7 +255,7 @@ public:
         WireIsControl();
         WireFromRoBToCPU();
         WireFromPredictorToCPU();
-        if(!isStop){
+        if(!isStop && !rob.isfull()){
             WireFromDecoderToRoBRS();
         }else{
             pc -= 4;

@@ -48,6 +48,12 @@ class RoB{
 private:
     void enQueue(){
         if(input.isAdd){
+            if(isfull()){
+                isFull = true;
+                return;
+            }
+            isFull = false;
+            length ++;
             output.flag2 = true;
             if(input.op == JAL){
                 output.des2 = input.des;
@@ -59,7 +65,7 @@ private:
                 input.value = input.pc + 4;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%10000;
+                tail = (tail + 1)%100;
             }else if(input.op == AUIPC){
                 output.des2 = input.des;
                 //output.serial2 = input.serial;
@@ -72,7 +78,7 @@ private:
                 input.value = input.pc + res;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%10000;
+                tail = (tail + 1)%100;
             }else if(input.op == LUI){
                 output.des2 = input.des;
                 //output.serial2 = input.serial;
@@ -85,7 +91,7 @@ private:
                 input.value = res;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%10000;
+                tail = (tail + 1)%100;
             } else if (input.op == EXIT) {
                 rob[tail] = input;
                 rob[tail].isReady = true;
@@ -103,7 +109,7 @@ private:
                     output.flag2 = false;
                 }
                 rob[tail] = input;
-                tail = (tail + 1)%10000;
+                tail = (tail + 1)%100;
             }
             input.isAdd = false;
         }
@@ -115,6 +121,7 @@ private:
             jalrsignal.isOK = true;
         }
         if(!rob[head].isBusy && rob[head].isReady  && head != tail){
+             length --;
             if(rob[head].op == EXIT){
                 isTerminal = true;
                 return;
@@ -153,7 +160,7 @@ private:
             }
             if(rob[head].op == BEQ || rob[head].op == BGE || rob[head].op == BGEU || rob[head].op == BLT || rob[head].op == BLTU || rob[head].op == BNE || rob[head].op == SB || rob[head].op == SH || rob[head].op == SW){
                 output.flag1 = false;
-                head = (head + 1)%10000;
+                head = (head + 1)%100;
                 return;
             }
             output.des1 = rob[head].des;
@@ -164,13 +171,13 @@ private:
                 output.value = rob[head].value;
             }
             output.flag1 = true;
-            head = (head + 1)%10000;
+            head = (head + 1)%100;
         }
     }
 
     void update(){
         if(InfoFromRS.flag){
-            for(int i = 0;i < 10000;i ++){
+            for(int i = 0;i < 100;i ++){
                 if(rob[i].serial == InfoFromRS.serial){
                     rob[i].value = InfoFromRS.res;
                     rob[i].isReady = true;
@@ -179,7 +186,7 @@ private:
             }
         }
         if(InfoFromLSB.flag){
-            for(int i = 0;i < 10000;i ++){
+            for(int i = 0;i < 100;i ++){
                 if(rob[i].serial == InfoFromLSB.serial){
                     rob[i].value = InfoFromLSB.value;
                     rob[i].isReady = true;
@@ -191,9 +198,10 @@ private:
     }
 
 public:
-    RoBInfo rob[10000];
+    RoBInfo rob[100];
     int head = 0;
     int tail = 0;
+    int length = 0;
     RoBInfo input;
     RoBOutput output;
     
@@ -206,6 +214,12 @@ public:
     JALRSignal jalrsignal;
     bool isControl = false;
 
+    bool isFull = false;
+
+    bool isfull(){
+        return length == 100;
+    }
+
     void run(){
         robtomem.serial = rob[head].serial;
         flush();
@@ -215,7 +229,7 @@ public:
     }
 
     void tick(){
-        for(int i = 0;i < 10000;i ++){
+        for(int i = 0;i < 100;i ++){
             rob[i].tick();
         }
         // head.flush();
@@ -233,7 +247,7 @@ public:
                 }
             }else if(head > tail){
                 bool signal = false;
-                for(int i = head;i < 10000;i ++){
+                for(int i = head;i < 100;i ++){
                     if(rob[i].serial > info.serial){
                         tail = i;
                         signal = true;
