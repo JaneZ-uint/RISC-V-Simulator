@@ -220,9 +220,9 @@ public:
     unsigned int run(){
         //freopen("1.out", "w", stdout);
         while (!isTerminal) {
-            if(clk == 58){
+            /*if(clk == 58){
                 printf("Here!");
-            }
+            }*/
             ++ clk;
             tick();
             Wire();
