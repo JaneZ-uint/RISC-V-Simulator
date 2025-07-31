@@ -59,7 +59,7 @@ private:
                 input.value = input.pc + 4;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%1000;
+                tail = (tail + 1)%10000;
             }else if(input.op == AUIPC){
                 output.des2 = input.des;
                 //output.serial2 = input.serial;
@@ -72,7 +72,7 @@ private:
                 input.value = input.pc + res;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%1000;
+                tail = (tail + 1)%10000;
             }else if(input.op == LUI){
                 output.des2 = input.des;
                 //output.serial2 = input.serial;
@@ -85,11 +85,11 @@ private:
                 input.value = res;
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%1000;
+                tail = (tail + 1)%10000;
             } else if (input.op == EXIT) {
                 rob[tail] = input;
                 rob[tail].isReady = true;
-                tail = (tail + 1)%1000;
+                tail = (tail + 1)%10000;
             } else{
                 if(input.op != SB && input.op != SH && input.op != SW && input.op != BEQ && input.op != BGE && input.op != BGEU && input.op != BLT && input.op != BLTU && input.op != BNE){
                     output.des2= input.des;
@@ -103,7 +103,7 @@ private:
                     output.flag2 = false;
                 }
                 rob[tail] = input;
-                tail = (tail + 1)%1000;
+                tail = (tail + 1)%10000;
             }
             input.isAdd = false;
         }
@@ -153,7 +153,7 @@ private:
             }
             if(rob[head].op == BEQ || rob[head].op == BGE || rob[head].op == BGEU || rob[head].op == BLT || rob[head].op == BLTU || rob[head].op == BNE || rob[head].op == SB || rob[head].op == SH || rob[head].op == SW){
                 output.flag1 = false;
-                head = (head + 1)%1000;
+                head = (head + 1)%10000;
                 return;
             }
             output.des1 = rob[head].des;
@@ -164,13 +164,13 @@ private:
                 output.value = rob[head].value;
             }
             output.flag1 = true;
-            head = (head + 1)%1000;
+            head = (head + 1)%10000;
         }
     }
 
     void update(){
         if(InfoFromRS.flag){
-            for(int i = 0;i < 1000;i ++){
+            for(int i = 0;i < 10000;i ++){
                 if(rob[i].serial == InfoFromRS.serial){
                     rob[i].value = InfoFromRS.res;
                     rob[i].isReady = true;
@@ -179,7 +179,7 @@ private:
             }
         }
         if(InfoFromLSB.flag){
-            for(int i = 0;i < 1000;i ++){
+            for(int i = 0;i < 10000;i ++){
                 if(rob[i].serial == InfoFromLSB.serial){
                     rob[i].value = InfoFromLSB.value;
                     rob[i].isReady = true;
@@ -191,7 +191,7 @@ private:
     }
 
 public:
-    RoBInfo rob[1000];
+    RoBInfo rob[10000];
     int head = 0;
     int tail = 0;
     RoBInfo input;
@@ -215,7 +215,7 @@ public:
     }
 
     void tick(){
-        for(int i = 0;i < 1000;i ++){
+        for(int i = 0;i < 10000;i ++){
             rob[i].tick();
         }
         // head.flush();
@@ -233,7 +233,7 @@ public:
                 }
             }else if(head > tail){
                 bool signal = false;
-                for(int i = head;i < 1000;i ++){
+                for(int i = head;i < 10000;i ++){
                     if(rob[i].serial > info.serial){
                         tail = i;
                         signal = true;

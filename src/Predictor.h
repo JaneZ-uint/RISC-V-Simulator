@@ -36,19 +36,19 @@ public:
     PredictorOutput output;
     
     void run(){
-        if(input.flag){
-            predictor[input.serial] = input;
-            input.flag = false;
-        }
-        if(inputALU.flag){
-            if(inputALU.res == 1){
-                output.new_pc = predictor[inputALU.serial].pc + predictor[inputALU.serial].offset;
-                output.serial = inputALU.serial;
-                output.flag = true;
-                flush();
-            }
-            inputALU.flag = false;
-        }
+        // if(input.flag){
+        //     predictor[input.serial] = input;
+        //     input.flag = false;
+        // }
+        // if(inputALU.flag){
+        //     if(inputALU.res == 1){
+        //         output.new_pc = predictor[inputALU.serial].pc + predictor[inputALU.serial].offset;
+        //         output.serial = inputALU.serial;
+        //         output.flag = true;
+        //         flush();
+        //     }
+        //     inputALU.flag = false;
+        // }
     }
 
     void flush(){
