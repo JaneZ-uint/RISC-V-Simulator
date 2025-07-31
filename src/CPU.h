@@ -238,6 +238,7 @@ public:
             std::cout << pc << '\n';*/
             
         }
+
         //fclose(stdout);
         return rf.value[10] & 0b011111111;
     }
