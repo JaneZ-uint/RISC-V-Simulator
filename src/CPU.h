@@ -9,6 +9,7 @@
 #include "RS.h"
 #include "Type.h"
 #include <cstdint>
+#include <cstdio>
 
 namespace JaneZ{
 
@@ -215,6 +216,9 @@ public:
     //总接口
     unsigned int run(){
         while (!isTerminal) {
+            /*if(rob.head == 40){
+                printf("Here!");
+            }*/
             ++ clk;
             tick();
             Wire();

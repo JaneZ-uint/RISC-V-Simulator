@@ -172,8 +172,8 @@ public:
                 }
             }
         }*/
-        if(rsLSB[head].Qj == 0 && rsLSB[head].Qk == 0){
-            if(rsLSB[head].signal == 1){
+        if(head != tail && rsLSB[head].signal == 1){
+            if(rsLSB[head].Qj == 0 && rsLSB[head].Qk == 0){
                 lsbinfo.des = rsLSB[head].des;
                 lsbinfo.imm = rsLSB[head].imm;
                 lsbinfo.op = rsLSB[head].op;

@@ -202,11 +202,11 @@ public:
     bool isControl = false;
 
     void run(){
+        robtomem.serial = rob[head].serial;
         flush();
         enQueue();
         deQue();
         update();
-        robtomem.serial = rob[head].serial;
     }
 
     void tick(){

@@ -35,12 +35,15 @@ public:
     InfoFromRoB infofromrob;
 
     //interface
-    void Queue() {
+    void Enqueue() {
         if(input.isAdd){
             lsb[tail] = input;
             tail = (tail + 1)%1000;
             input.isAdd = false;
         }
+    }
+
+    void Deque(){
         LSBInfo b = lsb[head];
         if(cnt == 0){
             if(head != tail){
@@ -72,8 +75,9 @@ public:
     }
 
     void run(){
-        Queue();
+        Enqueue();
         flush();
+        Deque();
         RMB();
     }
     
