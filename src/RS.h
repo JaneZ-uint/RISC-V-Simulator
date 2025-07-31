@@ -187,7 +187,7 @@ public:
     }
 
     void Deque(){
-        if(lsboutput.flag){
+        if(lsboutput.flag && head != tail){
             for(int i = 0;i < 1000;i ++){ 
                 if(lsboutput.serial == rsLSB[i].serial){
                     for(int j = 0;j < 1000;j ++){

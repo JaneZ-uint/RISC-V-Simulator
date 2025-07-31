@@ -218,11 +218,11 @@ public:
     //总接口
     
     unsigned int run(){
-        //freopen("1.out", "w", stdout);
+        // freopen("1.out", "w", stdout);
         while (!isTerminal) {
-            /*if(rob.head == 1000){
-                printf("Here!");
-            }*/
+            // if(clk == 1490){
+            //     printf("Here!");
+            // }
             ++ clk;
             tick();
             Wire();
@@ -230,16 +230,16 @@ public:
             JALRCheck();
 
             pc += 4;
-            /*std::cout << "round" << clk << std::endl;
-            for(int i = 0;i < 32;i ++){
-                std::cout << "reg[" << i << "] = " << rf.value[i] << '\n';
-            }
-            std::cout << rob.rob[rob.head].pc << '\n';
-            std::cout << pc << '\n';*/
+            // std::cout << "round" << clk << std::endl;
+            // for(int i = 0;i < 32;i ++){
+            //     std::cout << "reg[" << i << "] = " << rf.value[i] << '\n';
+            // }
+            // std::cout << rob.rob[rob.head].pc << '\n';
+            // std::cout << pc << '\n';
             
         }
 
-        //fclose(stdout);
+        // fclose(stdout);
         return rf.value[10] & 0b011111111;
     }
 
