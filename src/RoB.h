@@ -151,6 +151,11 @@ private:
                     break;
                 }
             }
+            if(rob[head].op == BEQ || rob[head].op == BGE || rob[head].op == BGEU || rob[head].op == BLT || rob[head].op == BLTU || rob[head].op == BNE || rob[head].op == SB || rob[head].op == SH || rob[head].op == SW){
+                output.flag1 = false;
+                head = (head + 1)%1000;
+                return;
+            }
             output.des1 = rob[head].des;
             output.serial1 = rob[head].serial;
             if(rob[head].des == 0){

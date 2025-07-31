@@ -196,7 +196,7 @@ public:
                                 rsLSB[j].Qj = 0;
                                 rsLSB[j].Vj = lsboutput.value;
                             }
-                            if(rsLSB[j].Qk == rsLSB[j].serial){
+                            if(rsLSB[j].Qk == rsLSB[i].serial){
                                 rsLSB[j].Qk = 0;
                                 rsLSB[j].Vk = lsboutput.value;
                             }
@@ -208,7 +208,7 @@ public:
                                 rsALU[j].Qj = 0;
                                 rsALU[j].Vj = lsboutput.value;
                             }
-                            if(rsALU[j].Qk == rsLSB[j].serial){
+                            if(rsALU[j].Qk == rsLSB[i].serial){
                                 rsALU[j].Qk = 0;
                                 rsALU[j].Vk = lsboutput.value;
                             }

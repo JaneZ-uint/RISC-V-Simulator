@@ -25,13 +25,13 @@ public:
         }else if(current.op == SLL){
             value = current.rs1 << current.rs2;
         }else if(current.op == SRL){
-            value = current.rs1 >> current.rs2;
+            value = static_cast<unsigned int>(current.rs1) >> current.rs2;
         }else if(current.op == SRA){
-            value = static_cast<int>(current.rs1) >> current.rs2;
+            value = current.rs1 >> current.rs2;
         }else if(current.op == SLT){
-            value = static_cast<int>(current.rs1) < static_cast<int>(current.rs2);
-        }else if(current.op == SLTU){
             value = current.rs1 < current.rs2;
+        }else if(current.op == SLTU){
+            value = static_cast<unsigned int>(current.rs1) < static_cast<unsigned int>(current.rs2);
         }else if(current.op == ADDI){
             value = current.rs1 + current.imm;
         }else if(current.op == ANDI){
@@ -43,23 +43,23 @@ public:
         }else if(current.op == SLLI){
             value = current.rs1 << current.imm;
         }else if(current.op == SRLI){
-            value = current.rs1 >> current.imm;
+            value = static_cast<unsigned int>(current.rs1) >> current.imm;
         }else if(current.op == SRAI){
-            value = static_cast<int>(current.rs1) >> current.imm;
+            value = current.rs1 >> current.imm;
         }else if(current.op == SLTI){
-            value = static_cast<int>(current.rs1) < static_cast<int>(current.imm);
-        }else if(current.op == SLTIU){
             value = current.rs1 < current.imm;
+        }else if(current.op == SLTIU){
+            value = static_cast<unsigned int>(current.rs1) < static_cast<unsigned int>(current.imm);
         }else if(current.op == BEQ){
             value = (current.rs1 == current.rs2);
         }else if(current.op == BGE){
-            value = static_cast<int>(current.rs1) >= static_cast<int>(current.rs2);
-        }else if(current.op == BGEU){
             value = current.rs1 >= current.rs2;
+        }else if(current.op == BGEU){
+            value = static_cast<unsigned int>(current.rs1) >= static_cast<unsigned int>(current.rs2);
         }else if(current.op == BLT){
-            value = static_cast<int>(current.rs1) < static_cast<int>(current.rs2);
-        }else if(current.op == BLTU){
             value = current.rs1 < current.rs2;
+        }else if(current.op == BLTU){
+            value = static_cast<unsigned int>(current.rs1) < static_cast<unsigned int>(current.rs2);
         }else if(current.op == BNE){
             value = current.rs1 != current.rs2;
         }
