@@ -278,9 +278,9 @@ public:
     void Run(){
         lsb.run();
         memory.run();
-        predictor.run();
-        rob.run();
         rs.run();
+        rob.run();
+        predictor.run();
     }
 
     void JALRCheck(){
