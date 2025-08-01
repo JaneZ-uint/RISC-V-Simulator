@@ -12,6 +12,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
+#include <algorithm>
+#include <vector>
+#include <random>
+#include <chrono>
+#include <functional>
 
 namespace JaneZ{
 
@@ -276,11 +281,25 @@ public:
     }
 
     void Run(){
-        lsb.run();
+        /*lsb.run();
         memory.run();
         rs.run();
-        rob.run();
-        predictor.run();
+        rob.run();*/
+        //predictor.run();
+        std::vector<std::function<void()>> instructions = {
+        [&] { lsb.run(); },
+        [&] { memory.run(); },
+        [&] { rs.run(); },
+        [&] { rob.run(); }
+        };
+
+        auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+        std::default_random_engine rng(seed);
+        std::shuffle(instructions.begin(), instructions.end(), rng);
+
+        for (auto& instr : instructions) {
+        instr();
+        }
     }
 
     void JALRCheck(){
