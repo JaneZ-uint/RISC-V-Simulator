@@ -2,6 +2,7 @@
 #include <string>
 #include "src/CPU.h"
 #include "src/RF.h"
+
 JaneZ::RF rf;
 bool isTerminal = false;
 
