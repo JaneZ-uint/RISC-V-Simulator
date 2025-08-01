@@ -46,7 +46,7 @@ struct JALRSignal{
 
 class RoB{
 private:
-static const int SIZE=10;
+static const int SIZE = 1000;
 
     void enQueue(){
         if(input.isAdd){
